@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  color: #0f172a;
+  background-color: #f8fafc;
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+}
+
+/* 모바일에서 입력창 확대 방지 (iOS Safari) */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
