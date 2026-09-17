@@ -7,6 +7,7 @@ export interface PlayerRow {
   player_name: string;
   grade: number;
   phone: string;
+  school_name: string;
   is_representative: boolean;
   created_at: string;
   updated_at: string;
@@ -17,7 +18,8 @@ export interface TeamRow {
   registration_number: string;
   client_request_id: string;
   division: Division;
-  school_name: string;
+  /** 팀 단위 학교명은 더 이상 사용하지 않습니다 (선수별 school_name으로 대체). 과거 데이터 호환을 위해 컬럼만 유지. */
+  school_name: string | null;
   team_name: string;
   player_count: number;
   representative_name: string;
@@ -43,13 +45,13 @@ export interface PlayerFormValue {
   player_name: string;
   grade: string; // 라디오/셀렉트 값 그대로 문자열로 관리 ("1" | "2" | "3")
   phone: string;
+  school_name: string;
   is_representative: boolean;
 }
 
 /** 참가신청 폼 전체 데이터 */
 export interface RegistrationFormValue {
   division: Division | "";
-  school_name: string;
   team_name: string;
   players: PlayerFormValue[];
   privacy_agreed: boolean;
@@ -62,7 +64,6 @@ export interface RegistrationFormValue {
 export interface RegisterTeamPayload {
   client_request_id: string;
   division: Division;
-  school_name: string;
   team_name: string;
   representative_name: string;
   representative_phone: string;
@@ -75,6 +76,7 @@ export interface RegisterTeamPayload {
     player_name: string;
     grade: number;
     phone: string;
+    school_name: string;
     is_representative: boolean;
   }[];
 }
@@ -83,4 +85,27 @@ export interface RegisterTeamResult {
   team_id: string;
   registration_number: string;
   duplicate: boolean;
+}
+
+/** event_settings 테이블 (모집정원 + 홍보자료 Storage 경로, 단일 행) */
+export interface EventSettingsRow {
+  id: number;
+  poster_path: string | null;
+  guidelines_path: string | null;
+  middle_max_teams: number;
+  high_max_teams: number;
+  updated_at: string;
+}
+
+export interface DivisionCapacityStatus {
+  count: number;
+  max: number;
+}
+
+/** get_public_event_status() RPC 결과 (참가자 페이지에서 사용, 개인정보 미포함) */
+export interface PublicEventStatus {
+  poster_path: string | null;
+  guidelines_path: string | null;
+  middle: DivisionCapacityStatus;
+  high: DivisionCapacityStatus;
 }

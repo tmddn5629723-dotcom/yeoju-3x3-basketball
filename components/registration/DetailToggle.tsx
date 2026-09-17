@@ -24,7 +24,7 @@ export function DetailToggle({ players }: { players: PlayerRow[] }) {
             .map((p, i) => (
               <li key={p.id} className="flex items-center justify-between px-4 py-3 text-sm">
                 <span className="text-slate-700">
-                  {i + 1}. {p.player_name} / {p.grade}학년 / {p.phone}
+                  {i + 1}. {p.player_name} / {p.school_name} / {p.grade}학년 / {p.phone}
                   {p.is_representative ? " / 대표자" : ""}
                 </span>
               </li>

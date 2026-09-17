@@ -60,7 +60,6 @@ export default async function CompletePage() {
           </div>
 
           <dl className="mt-6 space-y-3 text-left text-sm">
-            <SummaryRow label="학교명" value={teamRow.school_name} />
             <SummaryRow label="팀명" value={teamRow.team_name} />
             <SummaryRow label="참가부문" value={teamRow.division} />
             <SummaryRow label="참가선수" value={`${teamRow.player_count}명`} />

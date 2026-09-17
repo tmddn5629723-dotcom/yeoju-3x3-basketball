@@ -21,7 +21,6 @@ export function ConfirmModal({ value, submitting, errorMessage, onEdit, onConfir
 
         <dl className="mt-4 space-y-2 rounded-xl bg-slate-50 p-4 text-sm">
           <Row label="참가부문" value={value.division} />
-          <Row label="학교명" value={value.school_name} />
           <Row label="팀명" value={value.team_name} />
           <Row label="참가선수" value={`${value.players.length}명`} />
           <Row label="대표자" value={representative?.player_name ?? "-"} />
@@ -34,7 +33,7 @@ export function ConfirmModal({ value, submitting, errorMessage, onEdit, onConfir
             {value.players.map((p, i) => (
               <li key={p.key} className="flex items-center justify-between px-3 py-2 text-sm">
                 <span className="text-slate-700">
-                  {i + 1}. {p.player_name} / {p.grade}학년 / {p.phone}
+                  {i + 1}. {p.player_name} / {p.school_name} / {p.grade}학년 / {p.phone}
                   {p.is_representative ? " / 대표자" : ""}
                 </span>
               </li>

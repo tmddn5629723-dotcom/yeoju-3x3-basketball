@@ -34,15 +34,28 @@ export const TOURNAMENT_INFO = {
     end: "2026-10-17T23:59:59",
   },
 
-  // 기관 로고 / 대회 포스터 이미지 경로 (public 폴더에 파일을 넣고 경로만 바꾸면 됩니다)
-  // 예: "/images/logo.png", "/images/poster.jpg"
+  // 기관 로고 이미지 경로 (public 폴더에 파일을 넣고 경로만 바꾸면 됩니다)
+  // 예: "/images/logo.png"
   logoImagePath: null as string | null,
+  // (사용 중단) 대회 홍보포스터는 더 이상 이 값을 사용하지 않습니다.
+  // 관리자 페이지(/admin/materials > 대회자료 관리)에서 업로드하면 Supabase Storage에 저장되어
+  // 참가신청 페이지에 실시간으로 표시됩니다 (components/registration/PromoMaterials.tsx 참고).
   posterImagePath: null as string | null,
 
   organizerName: "여주시청소년수련관",
 } as const;
 
 export type Division = (typeof TOURNAMENT_INFO.divisions)[number];
+
+/**
+ * 부문별 모집정원의 "기본값(fallback)"입니다.
+ * 실제 운영 중인 정원은 Supabase의 event_settings 테이블(관리자 페이지 > 대회자료 관리에서 수정 가능)이
+ * 항상 우선하며, 이 값은 해당 데이터를 불러오기 전 잠깐 보여줄 초기 화면이나 예외 상황에서만 사용됩니다.
+ */
+export const DEFAULT_DIVISION_CAPACITY: Record<Division, number> = {
+  중등부: 5,
+  고등부: 5,
+};
 
 export function isApplicationOpen(now: Date = new Date()): boolean {
   const start = new Date(TOURNAMENT_INFO.applicationPeriod.start);

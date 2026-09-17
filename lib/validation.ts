@@ -25,6 +25,7 @@ export const PHONE_REGEX = /^01[0-9]-\d{3,4}-\d{4}$/;
 export const playerSchema = z.object({
   player_order: z.number().int().min(1).max(5),
   player_name: z.string().trim().min(1, "이름을 입력해주세요."),
+  school_name: z.string().trim().min(1, "학교명을 입력해주세요."),
   grade: z.coerce
     .number()
     .int()
@@ -40,7 +41,6 @@ export const playerSchema = z.object({
 export const registrationSchema = z.object({
   client_request_id: z.string().uuid(),
   division: z.enum(TOURNAMENT_INFO.divisions),
-  school_name: z.string().trim().min(1, "학교명을 입력해주세요."),
   team_name: z.string().trim().min(1, "팀명을 입력해주세요."),
   representative_name: z.string().trim().min(1, "대표자 이름을 입력해주세요."),
   representative_phone: z

@@ -18,6 +18,7 @@ interface EditablePlayer {
   key: string;
   id: string | null; // 기존 선수는 id가 있고, 새로 추가한 선수는 null
   player_name: string;
+  school_name: string;
   grade: string;
   phone: string;
 }
@@ -30,6 +31,7 @@ function toEditable(players: PlayerRow[]): EditablePlayer[] {
       key: p.id,
       id: p.id,
       player_name: p.player_name,
+      school_name: p.school_name,
       grade: String(p.grade),
       phone: p.phone,
     }));
@@ -60,7 +62,6 @@ export function TeamDetailClient({
   const [deleting, setDeleting] = useState(false);
 
   const [division, setDivision] = useState<Division>(team.division);
-  const [schoolName, setSchoolName] = useState(team.school_name);
   const [teamName, setTeamName] = useState(team.team_name);
   const [status, setStatus] = useState<TeamStatus>(team.status);
   const [editablePlayers, setEditablePlayers] = useState<EditablePlayer[]>(() =>
@@ -75,7 +76,6 @@ export function TeamDetailClient({
 
   function startEdit() {
     setDivision(team.division);
-    setSchoolName(team.school_name);
     setTeamName(team.team_name);
     setStatus(team.status);
     setEditablePlayers(toEditable(players));
@@ -91,7 +91,10 @@ export function TeamDetailClient({
   function addEditablePlayer() {
     setEditablePlayers((prev) => {
       if (prev.length >= TOURNAMENT_INFO.teamSizeMax) return prev;
-      return [...prev, { key: crypto.randomUUID(), id: null, player_name: "", grade: "", phone: "" }];
+      return [
+        ...prev,
+        { key: crypto.randomUUID(), id: null, player_name: "", school_name: "", grade: "", phone: "" },
+      ];
     });
   }
 
@@ -105,11 +108,11 @@ export function TeamDetailClient({
   function validateEdit(): boolean {
     const errors: Record<string, string> = {};
 
-    if (!schoolName.trim()) errors.school_name = "학교명을 입력해주세요.";
     if (!teamName.trim()) errors.team_name = "팀명을 입력해주세요.";
 
     editablePlayers.forEach((p, i) => {
       if (!p.player_name.trim()) errors[`players.${i}.player_name`] = "이름을 입력해주세요.";
+      if (!p.school_name.trim()) errors[`players.${i}.school_name`] = "학교명을 입력해주세요.";
       if (!p.grade) errors[`players.${i}.grade`] = "학년을 선택해주세요.";
       if (!PHONE_REGEX.test(p.phone.trim())) {
         errors[`players.${i}.phone`] = "연락처 형식이 올바르지 않습니다.";
@@ -146,6 +149,7 @@ export function TeamDetailClient({
         const commonFields = {
           player_order: i + 1,
           player_name: p.player_name.trim(),
+          school_name: p.school_name.trim(),
           grade: Number(p.grade),
           phone: p.phone.trim(),
           is_representative: isRepresentative,
@@ -171,7 +175,6 @@ export function TeamDetailClient({
         .from("teams")
         .update({
           division,
-          school_name: schoolName.trim(),
           team_name: teamName.trim(),
           player_count: editablePlayers.length,
           representative_name: representativePlayer.player_name.trim(),
@@ -273,7 +276,6 @@ export function TeamDetailClient({
               <Row label="접수번호" value={team.registration_number} />
               <Row label="접수일시" value={formatDateTime(team.created_at)} />
               <Row label="참가부문" value={team.division} />
-              <Row label="학교명" value={team.school_name} />
               <Row label="팀명" value={team.team_name} />
               <div className="flex items-center justify-between">
                 <dt className="text-slate-500">신청상태</dt>
@@ -308,7 +310,7 @@ export function TeamDetailClient({
               {sortedPlayers.map((p, i) => (
                 <li key={p.id} className="flex items-center justify-between py-2 text-sm">
                   <span className="text-slate-700">
-                    {i + 1}. {p.player_name} / {p.grade}학년 / {p.phone}
+                    {i + 1}. {p.player_name} / {p.school_name} / {p.grade}학년 / {p.phone}
                     {p.is_representative ? " / 대표자" : ""}
                   </span>
                 </li>
@@ -362,18 +364,6 @@ export function TeamDetailClient({
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">학교명</label>
-                <input
-                  value={schoolName}
-                  onChange={(e) => setSchoolName(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                />
-                {fieldErrors.school_name && (
-                  <p className="mt-1 text-xs font-medium text-red-600">{fieldErrors.school_name}</p>
-                )}
-              </div>
-
-              <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">팀명</label>
                 <input
                   value={teamName}
@@ -413,7 +403,7 @@ export function TeamDetailClient({
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <div>
                       <input
                         value={p.player_name}
@@ -424,6 +414,19 @@ export function TeamDetailClient({
                       {fieldErrors[`players.${i}.player_name`] && (
                         <p className="mt-1 text-xs font-medium text-red-600">
                           {fieldErrors[`players.${i}.player_name`]}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        value={p.school_name}
+                        onChange={(e) => updateEditablePlayer(i, { school_name: e.target.value })}
+                        placeholder="학교명"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                      />
+                      {fieldErrors[`players.${i}.school_name`] && (
+                        <p className="mt-1 text-xs font-medium text-red-600">
+                          {fieldErrors[`players.${i}.school_name`]}
                         </p>
                       )}
                     </div>

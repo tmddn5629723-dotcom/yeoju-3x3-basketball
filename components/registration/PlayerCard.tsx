@@ -39,8 +39,8 @@ export function PlayerCard({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="sm:col-span-1">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
           <label htmlFor={`${prefix}.name`} className="mb-1 block text-sm font-medium text-slate-700">
             이름 <span className="text-red-500">*</span>
           </label>
@@ -54,6 +54,22 @@ export function PlayerCard({
             className="w-full rounded-lg border border-slate-300 px-4 py-3 text-base focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
           />
           <FieldError message={errors[`${prefix}.player_name`]} />
+        </div>
+
+        <div>
+          <label htmlFor={`${prefix}.school_name`} className="mb-1 block text-sm font-medium text-slate-700">
+            학교명 <span className="text-red-500">*</span>
+          </label>
+          <input
+            id={`${prefix}.school_name`}
+            ref={(el) => registerFieldRef(`${prefix}.school_name`, el)}
+            type="text"
+            value={player.school_name}
+            onChange={(e) => onChange(index, { school_name: e.target.value })}
+            placeholder="여주중학교"
+            className="w-full rounded-lg border border-slate-300 px-4 py-3 text-base focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+          />
+          <FieldError message={errors[`${prefix}.school_name`]} />
         </div>
 
         <div>

@@ -27,6 +27,12 @@ export default function AdminProtectedLayout({
               >
                 참가팀 관리
               </Link>
+              <Link
+                href="/admin/materials"
+                className="rounded-md px-3 py-1.5 text-slate-700 hover:bg-white"
+              >
+                대회자료 관리
+              </Link>
             </nav>
             <LogoutButton />
           </div>

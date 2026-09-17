@@ -84,19 +84,21 @@ export function TeamsManager() {
 
       if (!keyword) return true;
 
+      const teamPlayers = playersByTeamId.get(team.id) ?? [];
       const haystack = [
         team.registration_number,
-        team.school_name,
         team.team_name,
         team.representative_name,
         team.representative_phone,
+        ...teamPlayers.map((p) => p.school_name),
+        ...teamPlayers.map((p) => p.player_name),
       ]
         .join(" ")
         .toLowerCase();
 
       return haystack.includes(keyword);
     });
-  }, [teams, search, divisionFilter, statusFilter]);
+  }, [teams, playersByTeamId, search, divisionFilter, statusFilter]);
 
   function handleResetFilters() {
     setSearch("");
@@ -130,7 +132,7 @@ export function TeamsManager() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="접수번호 / 학교명 / 팀명 / 대표자 / 대표자연락처 검색"
+            placeholder="접수번호 / 팀명 / 선수 이름 / 선수 학교명 / 대표자연락처 검색"
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 lg:col-span-2"
           />
 
@@ -187,7 +189,6 @@ export function TeamsManager() {
                   <th className="px-4 py-2 font-medium">접수번호</th>
                   <th className="px-4 py-2 font-medium">접수일시</th>
                   <th className="px-4 py-2 font-medium">참가부문</th>
-                  <th className="px-4 py-2 font-medium">학교명</th>
                   <th className="px-4 py-2 font-medium">팀명</th>
                   <th className="px-4 py-2 font-medium">선수인원</th>
                   <th className="px-4 py-2 font-medium">대표자</th>
@@ -203,7 +204,6 @@ export function TeamsManager() {
                     </td>
                     <td className="px-4 py-3 text-slate-500">{formatDateTime(team.created_at)}</td>
                     <td className="px-4 py-3 text-slate-600">{team.division}</td>
-                    <td className="px-4 py-3 text-slate-600">{team.school_name}</td>
                     <td className="px-4 py-3 text-slate-600">{team.team_name}</td>
                     <td className="px-4 py-3 text-slate-600">{team.player_count}명</td>
                     <td className="px-4 py-3 text-slate-600">{team.representative_name}</td>
@@ -237,9 +237,7 @@ export function TeamsManager() {
                   <StatusBadge status={team.status} />
                 </div>
                 <p className="mt-2 text-base font-semibold text-slate-900">{team.team_name}</p>
-                <p className="text-sm text-slate-500">
-                  {team.school_name} · {team.division}
-                </p>
+                <p className="text-sm text-slate-500">{team.division}</p>
                 <div className="mt-2 flex items-center justify-between text-sm text-slate-500">
                   <span>대표자 {team.representative_name}</span>
                   <span>{team.player_count}명</span>

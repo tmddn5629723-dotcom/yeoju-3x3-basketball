@@ -17,6 +17,7 @@ function createEmptyPlayer(order: number, isRepresentative = false): PlayerFormV
     player_name: "",
     grade: "",
     phone: "",
+    school_name: "",
     is_representative: isRepresentative,
   };
 }
@@ -24,7 +25,6 @@ function createEmptyPlayer(order: number, isRepresentative = false): PlayerFormV
 function createInitialForm(): RegistrationFormValue {
   return {
     division: "",
-    school_name: "",
     team_name: "",
     players: [
       createEmptyPlayer(1, true),
@@ -38,7 +38,12 @@ function createInitialForm(): RegistrationFormValue {
   };
 }
 
-export function RegistrationForm() {
+interface RegistrationFormProps {
+  /** 부문별로 모집이 마감되었는지 여부 (마감된 부문은 선택 불가로 표시) */
+  divisionFullMap?: Partial<Record<Division, boolean>>;
+}
+
+export function RegistrationForm({ divisionFullMap = {} }: RegistrationFormProps) {
   const router = useRouter();
   const [form, setForm] = useState<RegistrationFormValue>(() => createInitialForm());
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -80,9 +85,14 @@ export function RegistrationForm() {
   }
 
   function buildOrderedFieldKeys(playerCount: number): string[] {
-    const keys = ["division", "school_name", "team_name"];
+    const keys = ["division", "team_name"];
     for (let i = 0; i < playerCount; i++) {
-      keys.push(`players.${i}.player_name`, `players.${i}.grade`, `players.${i}.phone`);
+      keys.push(
+        `players.${i}.player_name`,
+        `players.${i}.school_name`,
+        `players.${i}.grade`,
+        `players.${i}.phone`
+      );
     }
     keys.push("privacy_agreed", "rules_agreed", "representative_agreed");
     return keys;
@@ -103,7 +113,6 @@ export function RegistrationForm() {
     const payload = {
       client_request_id: clientRequestId,
       division: form.division,
-      school_name: form.school_name.trim(),
       team_name: form.team_name.trim(),
       representative_name: representative?.player_name.trim() ?? "",
       representative_phone: representative?.phone.trim() ?? "",
@@ -114,6 +123,7 @@ export function RegistrationForm() {
       players: form.players.map((p) => ({
         player_order: p.player_order,
         player_name: p.player_name.trim(),
+        school_name: p.school_name.trim(),
         grade: p.grade,
         phone: p.phone.trim(),
         is_representative: p.is_representative,
@@ -167,7 +177,6 @@ export function RegistrationForm() {
         body: JSON.stringify({
           client_request_id: clientRequestId,
           division: form.division,
-          school_name: form.school_name.trim(),
           team_name: form.team_name.trim(),
           representative_name: representative.player_name.trim(),
           representative_phone: representative.phone.trim(),
@@ -178,6 +187,7 @@ export function RegistrationForm() {
           players: form.players.map((p) => ({
             player_order: p.player_order,
             player_name: p.player_name.trim(),
+            school_name: p.school_name.trim(),
             grade: Number(p.grade),
             phone: p.phone.trim(),
             is_representative: p.is_representative,
@@ -192,8 +202,12 @@ export function RegistrationForm() {
       }
 
       router.push("/complete");
-    } catch {
-      setSubmitError("참가신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error && err.message
+          ? err.message
+          : "참가신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+      );
       setSubmitting(false);
     }
   }
@@ -224,38 +238,37 @@ export function RegistrationForm() {
             className="grid grid-cols-2 gap-3"
             tabIndex={-1}
           >
-            {TOURNAMENT_INFO.divisions.map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => setForm((prev) => ({ ...prev, division: d as Division }))}
-                className={`rounded-xl border-2 py-4 text-base font-semibold transition ${
-                  form.division === d
-                    ? "border-brand-600 bg-brand-50 text-brand-700"
-                    : "border-slate-200 text-slate-600"
-                }`}
-              >
-                {d}
-              </button>
-            ))}
+            {TOURNAMENT_INFO.divisions.map((d) => {
+              const isFull = Boolean(divisionFullMap[d as Division]);
+              const isSelected = form.division === d;
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  disabled={isFull}
+                  onClick={() => {
+                    if (isFull) return;
+                    setForm((prev) => ({ ...prev, division: d as Division }));
+                  }}
+                  className={`rounded-xl border-2 py-4 text-base font-semibold transition ${
+                    isFull
+                      ? "cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400"
+                      : isSelected
+                        ? "border-brand-600 bg-brand-50 text-brand-700"
+                        : "border-slate-200 text-slate-600"
+                  }`}
+                >
+                  {d}
+                  {isFull ? (
+                    <span className="ml-1.5 text-xs font-semibold text-rose-500">모집마감</span>
+                  ) : (
+                    <span className="ml-1.5 text-xs font-medium text-brand-500">신청가능</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
           <FieldError message={errors.division} />
-        </div>
-
-        <div className="mt-4">
-          <label htmlFor="school_name" className="mb-1 block text-sm font-medium text-slate-700">
-            학교명 <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="school_name"
-            ref={(el) => registerFieldRef("school_name", el)}
-            type="text"
-            value={form.school_name}
-            onChange={(e) => setForm((prev) => ({ ...prev, school_name: e.target.value }))}
-            placeholder="여주중학교"
-            className="w-full rounded-lg border border-slate-300 px-4 py-3 text-base focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
-          />
-          <FieldError message={errors.school_name} />
         </div>
 
         <div className="mt-4">
@@ -321,7 +334,7 @@ export function RegistrationForm() {
           title="[필수] 개인정보 수집 및 이용 동의"
         >
           <p>수집목적: 3x3 농구대회 참가자 관리 및 대회 운영</p>
-          <p>수집항목: 학교명, 팀명, 이름, 학년, 연락처 등 참가신청 정보</p>
+          <p>수집항목: 참가부문, 팀명, 선수 이름, 학교명, 학년, 연락처 등 참가신청 및 대회 운영에 필요한 정보</p>
           <p>보유기간: 대회 종료 및 관련 행정업무 완료 후 관련 규정에 따라 처리</p>
         </AgreementItem>
 

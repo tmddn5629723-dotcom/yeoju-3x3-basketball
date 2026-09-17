@@ -17,43 +17,38 @@ function formatDateTime(iso: string): string {
   )}`;
 }
 
+/**
+ * 참가팀 목록 CSV.
+ * 컬럼 순서: 접수번호, 참가부문, 팀명, 선수인원, [선수N 이름, 선수N 학교명, 선수N 학년, 선수N 연락처] x N, 신청상태, 접수일시
+ * (팀 단위 학교명은 더 이상 사용하지 않으므로 컬럼에서 제외하고, 학교명은 선수별로 각각 기재합니다.)
+ */
 export function buildTeamsCsv(teams: TeamRow[], playersByTeamId: Map<string, PlayerRow[]>): string {
-  const header = [
-    "접수번호",
-    "접수일시",
-    "참가부문",
-    "학교명",
-    "팀명",
-    "선수인원",
-  ];
+  const header = ["접수번호", "참가부문", "팀명", "선수인원"];
 
-  for (let i = 1; i <= TOURNAMENT_INFO.teamSizeMax; i++) header.push(`선수${i}이름`);
-  for (let i = 1; i <= TOURNAMENT_INFO.teamSizeMax; i++) header.push(`선수${i}학년`);
-  for (let i = 1; i <= TOURNAMENT_INFO.teamSizeMax; i++) header.push(`선수${i}연락처`);
+  for (let i = 1; i <= TOURNAMENT_INFO.teamSizeMax; i++) {
+    header.push(`선수${i} 이름`, `선수${i} 학교명`, `선수${i} 학년`, `선수${i} 연락처`);
+  }
 
-  header.push("대표자", "대표자연락처", "신청상태");
+  header.push("신청상태", "접수일시");
 
   const rows = teams.map((team) => {
     const players = (playersByTeamId.get(team.id) ?? [])
       .slice()
       .sort((a, b) => a.player_order - b.player_order);
 
-    const row: (string | number)[] = [
-      team.registration_number,
-      formatDateTime(team.created_at),
-      team.division,
-      team.school_name,
-      team.team_name,
-      team.player_count,
-    ];
+    const row: (string | number)[] = [team.registration_number, team.division, team.team_name, team.player_count];
 
-    for (let i = 0; i < TOURNAMENT_INFO.teamSizeMax; i++) row.push(players[i]?.player_name ?? "");
     for (let i = 0; i < TOURNAMENT_INFO.teamSizeMax; i++) {
-      row.push(players[i] ? `${players[i].grade}학년` : "");
+      const p = players[i];
+      row.push(
+        p?.player_name ?? "",
+        p?.school_name ?? "",
+        p ? `${p.grade}학년` : "",
+        p?.phone ?? ""
+      );
     }
-    for (let i = 0; i < TOURNAMENT_INFO.teamSizeMax; i++) row.push(players[i]?.phone ?? "");
 
-    row.push(team.representative_name, team.representative_phone, team.status);
+    row.push(team.status, formatDateTime(team.created_at));
 
     return row;
   });
