@@ -10,10 +10,14 @@ function toUserMessage(dbErrorMessage: string | undefined): string {
   switch (dbErrorMessage) {
     case "DIVISION_FULL":
       return "선택하신 참가부문은 방금 모집정원이 마감되었습니다. 다른 부문을 선택하시거나 새로고침 후 다시 확인해주세요.";
+    case "REGISTRATION_CLOSED":
+      return "현재 참가신청 접수가 마감되어 더 이상 신청을 받을 수 없습니다. 새로고침 후 다시 확인해주세요.";
     default:
       return "참가신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
   }
 }
+
+const CLIENT_BLOCKING_ERRORS = new Set(["DIVISION_FULL", "REGISTRATION_CLOSED"]);
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -64,7 +68,7 @@ export async function POST(request: Request) {
       console.error("register_team RPC error:", error.code, error.message);
       return NextResponse.json(
         { success: false, message: toUserMessage(error.message) },
-        { status: error.message === "DIVISION_FULL" ? 409 : 500 }
+        { status: CLIENT_BLOCKING_ERRORS.has(error.message ?? "") ? 409 : 500 }
       );
     }
 

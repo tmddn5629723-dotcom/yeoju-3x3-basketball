@@ -2,9 +2,11 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { verifyReceiptToken, RECEIPT_COOKIE_NAME } from "@/lib/receiptCookie";
-import { TOURNAMENT_INFO } from "@/config/tournament";
+import { TOURNAMENT_INFO, formatEventDateTimeLabel } from "@/config/tournament";
 import { DetailToggle } from "@/components/registration/DetailToggle";
-import type { PlayerRow, TeamRow } from "@/types/database";
+import type { EventSettingsRow, PlayerRow, TeamRow } from "@/types/database";
+
+export const dynamic = "force-dynamic";
 
 export default async function CompletePage() {
   const cookieStore = await cookies();
@@ -38,6 +40,14 @@ export default async function CompletePage() {
   const playerRows = (players ?? []) as PlayerRow[];
   const representative = playerRows.find((p) => p.is_representative) ?? playerRows[0];
 
+  const { data: settingsData } = await supabase
+    .from("event_settings")
+    .select("event_date, event_time, event_location")
+    .eq("id", 1)
+    .single();
+  const settings = settingsData as Pick<EventSettingsRow, "event_date" | "event_time" | "event_location"> | null;
+  const eventDateTimeLabel = formatEventDateTimeLabel(settings?.event_date, settings?.event_time);
+
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
@@ -64,6 +74,8 @@ export default async function CompletePage() {
             <SummaryRow label="참가부문" value={teamRow.division} />
             <SummaryRow label="참가선수" value={`${teamRow.player_count}명`} />
             <SummaryRow label="대표자" value={representative?.player_name ?? "-"} />
+            <SummaryRow label="대회일시" value={eventDateTimeLabel} />
+            {settings?.event_location && <SummaryRow label="대회장소" value={settings.event_location} />}
           </dl>
 
           <DetailToggle players={playerRows} />

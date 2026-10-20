@@ -40,16 +40,27 @@ export default async function AdminDashboardPage() {
 
   const stats = computeDashboardStats(teams, players, capacityMap);
 
+  const isOpen = (settings?.registration_status ?? "접수중") === "접수중";
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-lg font-bold text-slate-900">참가신청 현황</h1>
-        <p className="text-sm text-slate-500">Supabase 데이터를 기준으로 자동 집계됩니다. (참가신청 페이지와 동일한 집계 기준)</p>
-        {error && (
-          <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-            데이터를 불러오지 못했습니다: {error.message}
-          </p>
-        )}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-bold text-slate-900">참가신청 현황</h1>
+          <p className="text-sm text-slate-500">Supabase 데이터를 기준으로 자동 집계됩니다. (참가신청 페이지와 동일한 집계 기준)</p>
+          {error && (
+            <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+              데이터를 불러오지 못했습니다: {error.message}
+            </p>
+          )}
+        </div>
+        <span
+          className={`rounded-full px-3 py-1.5 text-sm font-bold ${
+            isOpen ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+          }`}
+        >
+          참가신청 접수: {settings?.registration_status ?? "접수중"}
+        </span>
       </div>
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">

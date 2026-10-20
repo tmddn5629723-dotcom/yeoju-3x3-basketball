@@ -87,13 +87,27 @@ export interface RegisterTeamResult {
   duplicate: boolean;
 }
 
-/** event_settings 테이블 (모집정원 + 홍보자료 Storage 경로, 단일 행) */
+export type RegistrationStatus = "접수중" | "접수마감";
+
+/** event_settings 테이블 (대회정보 + 모집정원 + 홍보자료 Storage 경로 + 접수상태, 단일 행) */
 export interface EventSettingsRow {
   id: number;
   poster_path: string | null;
   guidelines_path: string | null;
   middle_max_teams: number;
   high_max_teams: number;
+  tournament_title: string;
+  intro_text: string | null;
+  recruitment_start: string | null; // YYYY-MM-DD
+  recruitment_end: string | null; // YYYY-MM-DD
+  event_date: string | null; // YYYY-MM-DD
+  event_time: string | null; // "13:00"
+  event_location: string;
+  fee_label: string;
+  notice_text: string | null;
+  guidance_text: string | null;
+  show_notice: boolean;
+  registration_status: RegistrationStatus;
   updated_at: string;
 }
 
@@ -108,4 +122,16 @@ export interface PublicEventStatus {
   guidelines_path: string | null;
   middle: DivisionCapacityStatus;
   high: DivisionCapacityStatus;
+  tournament_title: string;
+  intro_text: string | null;
+  recruitment_start: string | null;
+  recruitment_end: string | null;
+  event_date: string | null;
+  event_time: string | null;
+  event_location: string;
+  fee_label: string;
+  notice_text: string | null;
+  guidance_text: string | null;
+  show_notice: boolean;
+  registration_status: RegistrationStatus;
 }
